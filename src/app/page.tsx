@@ -1,69 +1,79 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import Link from "next/link";
+import { EmergencyNotice } from "@/components/EmergencyNotice";
+import { IncidentTypeSelector, UrgencySelector } from "@/components/IncidentTypeSelector";
+import { Card, LinkButton, Notice, PageTitle } from "@/components/ui";
+import { getAgentResponse } from "@/features/agent/agent.flow";
+import { NOT_A_DEADLINE_NOTICE, REASSURANCE_MESSAGE } from "@/features/agent/agent.rules";
+import { useSession } from "@/features/session/SessionProvider";
+
+export default function HomePage() {
+  const { incidentType, urgency, setIncidentType, setUrgency } = useSession();
+  const response = getAgentResponse({ incidentType, urgency });
+  const emergency = urgency === "immediate_danger";
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="space-y-5">
+      <PageTitle sub={NOT_A_DEADLINE_NOTICE}>첫 72시간</PageTitle>
+
+      <Notice tone="accent" icon="🌱">
+        <p className="text-base font-medium">{REASSURANCE_MESSAGE}</p>
+        <p className="mt-1 text-xs text-muted">
+          이 앱은 입력한 내용을 서버나 외부 AI로 보내지 않습니다. 기록은 기본적으로 이 화면을 닫으면 사라집니다.
+        </p>
+      </Notice>
+
+      <Card>
+        <UrgencySelector value={urgency} onChange={setUrgency} />
+      </Card>
+
+      {emergency && <EmergencyNotice />}
+
+      <Card>
+        <IncidentTypeSelector value={incidentType} onChange={setIncidentType} />
+      </Card>
+
+      <Card className="space-y-3">
+        <p className="text-sm">{response.message}</p>
+        {response.safetyNotice && !emergency && (
+          <Notice tone="warn" icon="ℹ">
+            {response.safetyNotice}
+          </Notice>
+        )}
+        <ul className="grid gap-2">
+          {response.nextActions.map((action, i) => (
+            <li key={action.id}>
+              <Link
+                href={action.href}
+                className={`block rounded-lg border px-3 py-3 transition hover:bg-accent-soft ${
+                  i === 0 ? "border-accent bg-accent-soft" : "border-border"
+                }`}
+              >
+                <span className="block text-sm font-semibold">{action.label}</span>
+                <span className="block text-xs text-muted">{action.description}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+        {!incidentType && !emergency && (
+          <p className="text-xs text-muted">상황을 선택하면 맞춤 가이드와 기록 도구가 열립니다.</p>
+        )}
+      </Card>
+
+      <div className="flex flex-wrap gap-2">
+        <LinkButton href="/resources" variant="secondary">
+          지원기관 바로 보기
+        </LinkButton>
+        <LinkButton href="/safety" variant="secondary">
+          안전 계획
+        </LinkButton>
+      </div>
+
+      <p className="text-xs text-muted">
+        이 서비스는 교육·지원 목적의 프로토타입입니다. 수사기관, 변호사, 상담사를 대체하지 않습니다. 화면 캡처나 알림을
+        통해 내용이 노출될 수 있으니 주변을 확인해 주세요.
+      </p>
     </div>
   );
 }

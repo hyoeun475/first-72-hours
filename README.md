@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 첫 72시간 (First 72 Hours)
 
-## Getting Started
+디지털 성범죄(불법촬영, 촬영물 유포, 유포협박, 딥페이크) 피해를 인지한 직후, 이용자가 다음 행동을 안전하게 파악하도록 돕는
+모바일 우선 웹 앱 MVP입니다. 수업 프로젝트용 교육·지원 프로토타입이며, 수사기관·변호사·상담사를 대체하지 않습니다.
 
-First, run the development server:
+> "72시간"은 초기 대응을 돕는 서비스 이름일 뿐, 신고·삭제·지원 신청의 법적 기한이 아닙니다.
+
+## 기능 범위
+
+| 화면 | 경로 | 내용 |
+|---|---|---|
+| 첫 화면 | `/` | 안심 문구, 즉각 위험 여부 확인(긴급 분기), 피해 유형 선택, 규칙 기반 에이전트의 다음 행동 제안 |
+| 대응 가이드 | `/guide` | 유형별 "지금 할 수 있는 일 / 피하는 편이 좋은 행동 / 기록하면 도움이 되는 정보 / 전문기관 연결 상황" |
+| 기록 | `/records` | URL·플랫폼·계정명·발견 일시·메모·진행 상태 등 **텍스트만** 기록. 생성·수정·삭제. 기록 생성 시각 자동 저장 |
+| 사건 정리 초안 | `/summary` | 입력한 기록만으로 시간순 참고 초안 생성, 편집, 복사, JSON 내보내기, 전체 삭제 |
+| 지원기관 | `/resources` | 공식 출처로 확인한 기관(112, 1366, 디지털성범죄피해자지원센터, 경찰 ECRM, 법률구조공단 132) |
+| 안전 계획 | `/safety` | 선택형 안전 점검 항목, 긴급 안내 |
+| 삭제 요청 문안 | `/takedown` | 플랫폼 유형별 삭제·차단 요청 문안 템플릿 생성·편집·복사 |
+
+### 하지 않는 것
+- 경찰 신고·플랫폼 삭제 요청 자동 제출
+- 이미지·영상·음성 업로드 또는 분석
+- 계정 가입, 신원 인증, 가해자 추적
+- 법률적 판단, 유죄 여부 판단, 위험도 점수화
+- 서버 저장, 외부 AI API 전송
+
+## 실행
+
+Node.js 20 이상(개발 환경: Node 24).
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev        # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 검증
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run lint       # ESLint
+npm run typecheck  # tsc --noEmit
+npm run test       # Vitest (단위 + React Testing Library)
+npm run build      # Next.js 프로덕션 빌드
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 데이터 처리 방식
 
-## Learn More
+- **기본값은 메모리만**: 입력한 내용은 브라우저 탭을 닫으면 사라집니다.
+- **로컬 보관(opt-in)**: 기록 화면에서 "이 기기 브라우저에 기록 보관하기"를 켜면 `localStorage`에 텍스트만 저장됩니다. 저장 범위와 위험을 화면에서 안내하며, 언제든 끄거나 전체 삭제할 수 있습니다.
+- **전송 없음**: 서버, 외부 AI, 분석 도구로 아무것도 보내지 않습니다. URL을 자동 방문하지도 않습니다.
+- **내보내기**: JSON 파일은 이용자가 직접 다운로드하며, 정의된 필드(`src/lib/export.ts`)만 포함합니다.
+- **에이전트**: 외부 LLM 없이 규칙 기반 상태 흐름 + 템플릿으로 동작합니다(`src/features/agent/`). 사용자가 입력하지 않은 사실은 추가하지 않고 '확인 필요'로 표시합니다.
 
-To learn more about Next.js, take a look at the following resources:
+## 지원기관 정보 검증
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+`src/data/support-resources.ko.ts`의 각 항목에는 `sourceLabel`과 `lastVerifiedAt`(2026-11-09)이 기록되어 있습니다.
+운영시간·지원 범위는 변동될 수 있으므로 실제 배포 전 공식 누리집에서 재확인해야 합니다. 플랫폼별 공식 신고 페이지 URL은
+공식 도움말로 확인되기 전까지 템플릿에 넣지 않았습니다(`officialReportUrl` 비움).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 알려진 한계
 
-## Deploy on Vercel
+- 수업 프로젝트용 프로토타입입니다. 실제 피해자에게 공개하기 전 디지털 성범죄 지원기관, 법률·개인정보·보안 전문가, 실제 이용자 관점의 검토가 필요합니다.
+- 안내 문구는 전문가 검수를 거치지 않았습니다.
+- `tel:` 링크는 터치 기기 또는 모바일 UA로 추정되는 환경에서만 버튼으로 노출됩니다. 데스크톱에서는 번호만 표시합니다.
+- "빠른 나가기"는 다른 사이트로 이동만 하며 방문 기록을 지우지 않습니다.
+- 브라우저 로컬 저장은 같은 기기를 쓰는 다른 사람이나 악성 프로그램으로부터 보호하지 못합니다.
+- E2E(Playwright) 테스트는 아직 없습니다. 접근성은 라벨·키보드 포커스·명도 대비를 수동 점검했으며 자동 감사는 미실시입니다.
+- 한국어 UI만 제공합니다. 긴급 번호는 대한민국 기준이며 다른 국가 이용자에게는 일반화된 문구를 표시합니다.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 폴더 구조
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/
+  app/            화면 (App Router)
+  components/     UI 컴포넌트
+  features/agent/ 규칙 기반 에이전트, 요약 생성
+  features/session/ 세션 상태 (Context, opt-in localStorage)
+  data/           안내 문구, 지원기관, 삭제 요청 템플릿
+  lib/            검증(zod), 내보내기, 시간, 저장소
+tests/            Vitest 테스트
+.claude/skills/first-72-hours-agent/SKILL.md  프로젝트 작업 원칙
+```

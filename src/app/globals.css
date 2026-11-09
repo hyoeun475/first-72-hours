@@ -1,26 +1,79 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f7f5f1;
+  --surface: #ffffff;
+  --foreground: #1f2430;
+  --muted: #5b6270;
+  --border: #e3dfd7;
+  --accent: #2f5d62;
+  --accent-strong: #244a4e;
+  --accent-soft: #e4efef;
+  --warn: #8a4b08;
+  --warn-soft: #fbeedb;
+  --danger: #8b2635;
+  --danger-soft: #f8e4e6;
+  --focus: #1d4ed8;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-focus: var(--focus);
+  --font-sans:
+    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+    "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #15181e;
+    --surface: #1e222a;
+    --foreground: #eef0f3;
+    --muted: #aab1bd;
+    --border: #353b46;
+    --accent: #8fc5c9;
+    --accent-strong: #b7dde0;
+    --accent-soft: #223a3d;
+    --warn: #f0b36a;
+    --warn-soft: #3b2b14;
+    --danger: #f1a3ad;
+    --danger-soft: #3f1f25;
+    --focus: #93b4ff;
   }
+}
+
+html {
+  color-scheme: light dark;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
 }
